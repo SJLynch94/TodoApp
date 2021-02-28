@@ -58,13 +58,12 @@ public class DBHelper extends SQLiteOpenHelper {
     {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put("taskTitle", taskTitle);
-        contentValues.put("taskDescription", taskDescription);
-        contentValues.put("completionDate", completionDate);
-        contentValues.put("isCompleted", isCompleted);
-        //long result =
+        contentValues.put(TODO_TASK_TITLE, taskTitle);
+        contentValues.put(TODO_TASK_DESCRIPTION, taskDescription);
+        contentValues.put(TODO_TASK_COMPLETION_DATE, completionDate);
+        contentValues.put(TODO_TASK_IS_COMPLETED, isCompleted);
         return db.insert(TODO_ITEM_TABLE, null, contentValues) != -1;
-
+        //long result =
         /*if (result == -1) {
             return false;
         } else {
@@ -76,15 +75,15 @@ public class DBHelper extends SQLiteOpenHelper {
     public Boolean onUpdateData(String taskTitle, String taskDescription, int completionDate, int isCompleted) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put("taskTitle", taskTitle);
-        contentValues.put("taskDescription", taskDescription);
-        contentValues.put("completionDate", completionDate);
-        contentValues.put("isCompleted", isCompleted /*== true ? 1 : 0*/);
+        contentValues.put(TODO_TASK_TITLE, taskTitle);
+        contentValues.put(TODO_TASK_DESCRIPTION, taskDescription);
+        contentValues.put(TODO_TASK_COMPLETION_DATE, completionDate);
+        contentValues.put(TODO_TASK_IS_COMPLETED, isCompleted);
         Cursor cursor = db.rawQuery("Select * from " + TODO_ITEM_TABLE + " where name = ?", new String[]{taskTitle});
         if(cursor.getCount() <= 0) {
             return false;
         }
-        return db.update(TODO_ITEM_TABLE, contentValues, "taskTitle=?", new String[]{taskTitle}) != -1;
+        return db.update(TODO_ITEM_TABLE, contentValues,  TODO_TASK_TITLE + "=?", new String[]{taskTitle}) != -1;
 
         /*if (cursor.getCount() > 0) {
             //long result =
@@ -106,7 +105,7 @@ public class DBHelper extends SQLiteOpenHelper {
         if(cursor.getCount() <= 0) {
             return false;
         }
-        return db.delete(TODO_ITEM_TABLE, "taskTitle=?", new String[]{taskTitle}) != -1;
+        return db.delete(TODO_ITEM_TABLE, TODO_TASK_TITLE + "=?", new String[]{taskTitle}) != -1;
 
         /*if (cursor.getCount() > 0) {
             long result = db.delete("TodoItemDetails", "taskTitle=?", new String[]{taskTitle});

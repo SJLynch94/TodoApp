@@ -72,8 +72,6 @@ public class MainActivity extends AppCompatActivity {
         mTodoItemsDatabase = new DBHelper(this);
         mergeSort = new MergeSort();
 
-
-
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.bottom_navigation);
         navigation.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener);
         Menu menu = navigation.getMenu();
@@ -100,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        try {
+        /*try {
             Cursor result = mTodoItemsDatabase.onGetData();
             try {
 
@@ -109,11 +107,12 @@ public class MainActivity extends AppCompatActivity {
             }
         } catch (Exception e) {
 
-        }
+        }*/
+
         Cursor resultData = mTodoItemsDatabase.onGetData();
         if(resultData.getCount() == 0) {
             Toast.makeText(MainActivity.this, "No Todo Item Entries Exist.", Toast.LENGTH_SHORT).show();
-            getDB().onInsertData("Todo Task Title", "Todo Task Description", 0, 0);
+            //getDB().onInsertData("Todo Task Title", "Todo Task Description", 0, 0);
         } else {
             //mDatabaseList = new ArrayList<>();
             //mDatabaseItems = new TodoItem[10];

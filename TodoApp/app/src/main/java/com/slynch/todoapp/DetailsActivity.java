@@ -127,11 +127,11 @@ public class DetailsActivity extends AppCompatActivity {
         updateItemButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
+                /*try {
 
                 } catch (Exception e) {
 
-                }
+                }*/
                 Calendar calendar = Calendar.getInstance();
                 String itemTaskTitle = taskTitle.getText().toString();
                 String itemTaskDescription = taskDescription.getText().toString();
