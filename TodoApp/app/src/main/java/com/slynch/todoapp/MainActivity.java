@@ -116,16 +116,16 @@ public class MainActivity extends AppCompatActivity {
             getDB().onInsertData("Todo Task Title", "Todo Task Description", 0, 0);
         } else {
             //mDatabaseList = new ArrayList<>();
-            mDatabaseItems = new TodoItem[10];
-            for (int i = 0; i < 10; ++i)
+            //mDatabaseItems = new TodoItem[10];
+            /*for (int i = 0; i < 10; ++i)
             {
                 int date = 1614440170 + 1000000 - (i * 10000);
                 TodoItem item = new TodoItem("Fix Database", "Fix the storing of todo items into the database.", date, 0);
                 Log.d(TAG, "Date in UNIX: " + date);
                 mDatabaseItems[i] = item;
                 //mDatabaseList.add(item);
-            }
-            /*mDatabaseItems = new TodoItem[resultData.getCount()];
+            }*/
+            mDatabaseItems = new TodoItem[resultData.getCount()];
             int counter = 0;
             while(resultData.moveToNext())
             {
@@ -133,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
                 TodoItem item = new TodoItem(resultData.getString(0), resultData.getString(1), resultData.getInt(2), resultData.getInt(3));
                 mDatabaseItems[counter] = item;
                 ++counter;
-            }*/
+            }
         }
 
         mergeSort.sort(mDatabaseItems, 0, mDatabaseItems.length - 1);
