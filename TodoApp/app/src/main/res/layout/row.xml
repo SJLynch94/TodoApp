@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="25dp"
+    android:descendantFocusability="blocksDescendants"
+    >
+
+    <Switch
+        android:id="@+id/isCompletedSwitch"
+        android:layout_width="125dp"
+        android:layout_height="50dp"
+        android:layout_below="@id/completionDateText"
+        android:layout_marginLeft="25dp"
+        android:layout_marginTop="25dp"
+        android:text="@string/is_task_completed" />
+
+    <ImageButton
+        android:id="@+id/deleteTodoItemButton"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginLeft="50dp"
+        android:layout_marginTop="25dp"
+        android:layout_below="@id/completionDateText"
+        android:layout_toRightOf="@id/isCompletedSwitch"
+        android:background="@drawable/delete_todo_item_holo_dark"
+        android:gravity="center" />
+
+    <TextView
+        android:id="@+id/taskTitleEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/TextAppearance.AppCompat.Title"
+        android:textColor="#FFF"
+        android:textSize="21sp" />
+
+    <TextView
+        android:id="@+id/taskDescriptionEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/taskTitleEditText"
+        android:singleLine="true"
+        android:ellipsize="end"
+        style="@style/TextAppearance.AppCompat.SearchResult.Subtitle"
+        android:textColor="#FFF"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/completionDateText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/taskDescriptionEditText"
+        android:layout_marginTop="25dp"
+        android:textColor="#FFF"
+        android:textSize="18sp"
+        />
+
+</RelativeLayout>

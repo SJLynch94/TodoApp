@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navigation_todo_list"
+        android:icon="@drawable/ic_home_black_24dp"
+        android:title="Todo List" />
+
+    <item
+        android:id="@+id/navigation_todo_details"
+        android:icon="@drawable/ic_favourites_black_24dp"
+        android:title="Todo Details" />
+</menu>

@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Todo App</string>
+    <string name="title_todo_list">Things You Need To Do!</string>
+    <string name="navigation_todo_list">Todo List</string>
+    <string name="navigation_todo_details">Todo Details</string>
+    <string name="button_add_todo_item_content_description">AddTodoItem</string>
+
+    <string name="databaseName">TodoItemDatabase.db</string>
+
+    <string name="default_task_title_text">Todo Task Title</string>
+    <string name="default_task_description_text">Todo Task Description</string>
+    <string name="default_task_completion_date_text">01/01/01</string>
+    <string name="is_task_completed">Is Task Completed?</string>
+
+</resources>
