@@ -8,13 +8,12 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
-import android.widget.DatePicker;
 import android.widget.ImageButton;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -25,11 +24,15 @@ import androidx.annotation.Nullable;
 public class TodoItemAdapter extends ArrayAdapter<TodoItem> {
 
     private static final String TAG = "TodoItemAdapter";
+    // Member variables to be used within the adapter
     private Context mContext;
     private int mResource;
-    private int lastPosition = -1;
-    private ViewHolder viewHolder;
+    private TodoItemAdapter mAdapter;
+    private TodoItem[] mDataArray;
+    private int mLastPosition = -1;
+    private ViewHolder mViewHolder;
 
+    // Class to hold the UI/Widgets for smoother transitions in the list view
     static class ViewHolder {
         TextView title;
         TextView description;
@@ -38,40 +41,50 @@ public class TodoItemAdapter extends ArrayAdapter<TodoItem> {
         ImageButton deleteTodoItemButton;
     }
 
+    // Constructor with the context, resource/layout, items to be loaded in the list view
     public TodoItemAdapter(Context context, int resource, TodoItem[] todoItems) {
         super(context, resource, todoItems);
         mContext = context;
         mResource = resource;
+        mDataArray = todoItems;
+        mAdapter = this;
     }
 
+    // View function for the list view to load each items data
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+        // Get the data from the current position
         int taskID = getItem(position).getTaskID();
         String title = getItem(position).getTaskTitle();
         String description = getItem(position).getTaskDescription();
         int completionDate = getItem(position).getCompletionDate();
         int isCompleted = getItem(position).getIsCompleted();
 
+        // Assign convertView to new view to be returned
         View view = convertView;
 
+        // Check if view is null then create the layout
         if(view == null) {
             final LayoutInflater layoutInflater = LayoutInflater.from(mContext);
             view = layoutInflater.inflate(mResource, null);
-            viewHolder = new ViewHolder();
-            viewHolder.title = (TextView) view.findViewById(R.id.taskTitleEditText);
-            viewHolder.description = (TextView) view.findViewById(R.id.taskDescriptionEditText);
-            viewHolder.isCompleted = (Switch) view.findViewById(R.id.isCompletedSwitch);
-            viewHolder.completionDate = (TextView) view.findViewById(R.id.completionDateText);
-            viewHolder.deleteTodoItemButton = (ImageButton) view.findViewById(R.id.deleteTodoItemButton);
-            view.setTag(viewHolder);
+            // Create new View Holder, assign each UI/widget by finding the objects
+            mViewHolder = new ViewHolder();
+            mViewHolder.title = (TextView) view.findViewById(R.id.taskTitleEditText);
+            mViewHolder.description = (TextView) view.findViewById(R.id.taskDescriptionEditText);
+            mViewHolder.isCompleted = (Switch) view.findViewById(R.id.isCompletedSwitch);
+            mViewHolder.completionDate = (TextView) view.findViewById(R.id.completionDateText);
+            mViewHolder.deleteTodoItemButton = (ImageButton) view.findViewById(R.id.deleteTodoItemButton);
+            view.setTag(mViewHolder);
         }
-        else {
-            viewHolder = (ViewHolder) view.getTag();
+        else { // Otherwise assign the viewholder as it is already available
+            mViewHolder = (ViewHolder) view.getTag();
         }
 
-        Animation animation = AnimationUtils.loadAnimation(mContext, position > lastPosition ? R.anim.load_down_anim : R.anim.load_up_anim);
+        // Create an animation to run based on the position and last position, using either load up or down, start animation and assign last position to the current position
+        Animation animation = AnimationUtils.loadAnimation(mContext, position > mLastPosition ? R.anim.load_down_anim : R.anim.load_up_anim);
         view.startAnimation(animation);
-        lastPosition = position;
+        mLastPosition = position;
 
+        // Calculate date to be used to set the date picker
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(((long) completionDate) * 1000L);
         int year = calendar.get(Calendar.YEAR);
@@ -80,30 +93,32 @@ public class TodoItemAdapter extends ArrayAdapter<TodoItem> {
         Date date = new Date();
         date.setTime(((long) completionDate) * 1000L);
         Log.d(TAG, "Date is: " + year + "/" + month + "/" + day);
-        Log.d(TAG, "Moved item: " + getItem(position).getTaskTitle());
 
-        viewHolder.title.setText(title);
-        viewHolder.description.setText(description);
-        viewHolder.isCompleted.setChecked(isCompleted == 1 ? true : false);
-        viewHolder.completionDate.setText(date.toString());
+        // Set data to the UI/widgets
+        mViewHolder.title.setText(title);
+        mViewHolder.description.setText(description);
+        mViewHolder.isCompleted.setChecked(isCompleted == 1 ? true : false);
+        mViewHolder.completionDate.setText(date.toString());
 
-        viewHolder.isCompleted.setOnClickListener(new View.OnClickListener() {
+        // On Click Listener for the switch within the list view
+        mViewHolder.isCompleted.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(MainActivity.getDB().onHasDataInTable(taskID, title, description, (int)date.getTime(), isCompleted)) {
-                    Boolean hasUpdatedItem = MainActivity.getDB().onUpdateData(taskID, title, description, (int)date.getTime(), viewHolder.isCompleted.isChecked() == true ? 1 : 0);
-                    if(hasUpdatedItem) {
-                        Toast.makeText(v.getContext(), "Entry " + title + " updated.", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(v.getContext(), "Entry " + title + " has not updated.", Toast.LENGTH_SHORT).show();
-                    }
+                // Update and check if it has worked or not
+                Boolean hasUpdatedItem = MainActivity.getDB().onUpdateData(taskID, title, description, completionDate, mViewHolder.isCompleted.isChecked() == true ? 1 : 0);
+                if(hasUpdatedItem) {
+                    Toast.makeText(v.getContext(), "Entry " + title + " updated.", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(v.getContext(), "Entry " + title + " has not updated.", Toast.LENGTH_SHORT).show();
                 }
             }
         });
 
-        viewHolder.deleteTodoItemButton.setOnClickListener(new View.OnClickListener() {
+        // On Click Listener for the delete button within the list view
+        mViewHolder.deleteTodoItemButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Delete and check if it has worked or not
                 Boolean hasDeletedItem = MainActivity.getDB().onDeleteData(taskID);
                 if(hasDeletedItem) {
                     Toast.makeText(v.getContext(), "Entry " + title + " deleted.", Toast.LENGTH_SHORT).show();
@@ -114,9 +129,5 @@ public class TodoItemAdapter extends ArrayAdapter<TodoItem> {
         });
 
         return view;
-    }
-
-    public void updateItem(int position, TodoItem item) {
-
     }
 }

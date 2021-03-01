@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DBHelper extends SQLiteOpenHelper {
 
-    // Constants
+    // Constants for easier usage of the database and queries
     public static final String TODO_ITEM_TABLE = "TodoItemDetails";
     public static final String TODO_TASK_ID = "taskID";
     public static final String TODO_TASK_TITLE = "taskTitle";
@@ -32,16 +32,10 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public void onDelete() {
         SQLiteDatabase db = getWritableDatabase();
-        //db.execSQL("DROP TABLE IF EXISTS " + TODO_ITEM_TABLE);
-        //db.delete(TODO_ITEM_TABLE, null, null);
+        db.execSQL("DROP TABLE IF EXISTS " + TODO_ITEM_TABLE);
     }
 
-    public Boolean onHasDataInTable(int taskID, String taskTitle, String taskDescription, int completionDate, int isCompleted) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TODO_ITEM_TABLE + " WHERE " + TODO_TASK_ID + "=?", new String[]{Integer.toString(taskID)});
-        return cursor.getCount() > 0;
-    }
-
+    // Insert function of the data into the database table
     public Boolean onInsertData(String taskTitle, String taskDescription, int completionDate, int isCompleted)
     {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -53,7 +47,7 @@ public class DBHelper extends SQLiteOpenHelper {
         return db.insert(TODO_ITEM_TABLE, null, contentValues) != -1;
     }
 
-
+    // Update function to update pre-existing data into the database table
     public Boolean onUpdateData(int taskID, String taskTitle, String taskDescription, int completionDate, int isCompleted) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -81,7 +75,6 @@ public class DBHelper extends SQLiteOpenHelper {
     // Get data from the table within the database
     public Cursor onGetData() {
         SQLiteDatabase db = this.getWritableDatabase();
-        //Cursor cursor = db.rawQuery("SELECT * FROM " + TODO_ITEM_TABLE, null);
         Cursor cursor = db.rawQuery("SELECT " + TODO_TASK_ID + ", " + TODO_TASK_TITLE + ", " + TODO_TASK_DESCRIPTION + ", " + TODO_TASK_COMPLETION_DATE + ", " + TODO_TASK_IS_COMPLETED + " FROM " + TODO_ITEM_TABLE, null);
         return cursor;
     }

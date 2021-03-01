@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 
 import androidx.annotation.NonNull;
@@ -21,6 +22,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class DetailsActivity extends AppCompatActivity {
 
+    // Member variables to be used within the activity for finding the UI/widgets
     private EditText taskTitle;
     private EditText taskDescription;
     private DatePicker completionDate;
@@ -28,25 +30,25 @@ public class DetailsActivity extends AppCompatActivity {
     private ImageButton updateItemButton;
     private ImageButton deleteItemButton;
 
+    private TodoItemAdapter mAdapter;
+
     private static final String TAG = "DetailsActivity";
 
+    // On Click Listener for the bottom navigation menu
     private BottomNavigationView.OnNavigationItemSelectedListener onNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
-
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_todo_list:
-                    //mAppTitle.setText(R.string.navigation_todo_list);
-                    return true;
                 case R.id.navigation_todo_details:
-                    //mAppTitle.setText(R.string.navigation_todo_details);
                     return true;
             }
             return false;
         }
     };
 
+    // Convert date picker to UNIX time stamp
     int datePickerTimeToTimeStamp(int year, int month, int day, int hour, int minute, int second) {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.YEAR, year);
@@ -59,14 +61,13 @@ public class DetailsActivity extends AppCompatActivity {
         return (int)(calendar.getTimeInMillis() / 1000L);
     }
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_todo_details);
         Log.d(TAG, "onCreate: Started.");
 
+        // Find all UI/widgets of the Details Activity
         taskTitle = (EditText)findViewById(R.id.taskTitleEditText);
         taskDescription = (EditText)findViewById(R.id.taskDescriptionEditText);
         completionDate = (DatePicker)findViewById(R.id.completionDatePicker);
@@ -74,12 +75,15 @@ public class DetailsActivity extends AppCompatActivity {
         updateItemButton = (ImageButton)findViewById(R.id.addTodoItemButton);
         deleteItemButton = (ImageButton)findViewById(R.id.deleteTodoItemButton);
 
+        // Get the Bundled data of the Item selected if selected
         TodoItem item = (TodoItem) getIntent().getSerializableExtra("todoItemClicked");
 
+        // If item is not null then set data to the UI/widgets, else leave empty and set the complete task switch to be invisible
         if (item != null) {
             taskTitle.setText(item.getTaskTitle());
             taskDescription.setText(item.getTaskDescription());
             isCompleted.setChecked(item.getIsCompleted() == 1 ? true : false);
+            // Calculate the datepicker from the completion date int
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(((long) item.getCompletionDate()) * 1000L);
             int year = calendar.get(Calendar.YEAR);
@@ -91,25 +95,26 @@ public class DetailsActivity extends AppCompatActivity {
             isCompleted.setVisibility(View.GONE);
         }
 
+        // Find the bottom navigation view, assign it and set the menu item to be 1 for Details Activity
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.bottom_navigation);
-        navigation.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener);
-
-
         Menu menu = navigation.getMenu();
         MenuItem menuItem = menu.getItem(1);
         menuItem.setChecked(true);
 
+        // Set on Click Listener for the bottom nvaigation
         navigation.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch(item.getItemId()) {
                     case R.id.navigation_todo_list:
+                        // Load Intent for Main Activity and finish the Details Activity
                         Intent intentTodoList = new Intent(DetailsActivity.this, MainActivity.class);
                         startActivity(intentTodoList);
                         finish();
                         break;
 
                     case R.id.navigation_todo_details:
+                        // Refresh Details Activity
                         finish();
                         startActivity(getIntent());
                         break;
@@ -118,33 +123,33 @@ public class DetailsActivity extends AppCompatActivity {
             }
         });
 
+        // On Click Listener for the is completed switch
         isCompleted.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String itemTaskTitle = taskTitle.getText().toString();
-                String itemTaskDescription = taskDescription.getText().toString();
+                // Get the new checked input from the switch
                 int itemIsCompleted = isCompleted.isChecked() == true ? 1 : 0;
-                int itemCompletionDate = datePickerTimeToTimeStamp(completionDate.getYear(), completionDate.getMonth(), completionDate.getDayOfMonth(), 0, 0, 0);
-
-                if(MainActivity.getDB().onHasDataInTable(item.getTaskID(), item.getTaskTitle(), item.getTaskDescription(), item.getCompletionDate(), itemIsCompleted)) {
-                    Boolean hasUpdatedItem = MainActivity.getDB().onUpdateData(item.getTaskID(), item.getTaskTitle(), item.getTaskDescription(), item.getCompletionDate(), itemIsCompleted);
-                    if(hasUpdatedItem) {
-                        Toast.makeText(DetailsActivity.this, "Entry " + itemTaskTitle + " updated.", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(DetailsActivity.this, "Entry " + itemTaskTitle + " has not updated.", Toast.LENGTH_SHORT).show();
-                    }
+                // Update database with the the new is checked input and test to see if update has worked or not
+                Boolean hasUpdatedItem = MainActivity.getDB().onUpdateData(item.getTaskID(), item.getTaskTitle(), item.getTaskDescription(), item.getCompletionDate(), itemIsCompleted);
+                if(hasUpdatedItem) {
+                    Toast.makeText(DetailsActivity.this, "Entry " + item.getTaskTitle() + " updated.", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(DetailsActivity.this, "Entry " + item.getTaskTitle() + " has not updated.", Toast.LENGTH_SHORT).show();
                 }
                 finish();
             }
         });
 
+        // On Click Listener for the insert/update button
         updateItemButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Get all the data from the UI/widgets
                 String itemTaskTitle = taskTitle.getText().toString();
                 String itemTaskDescription = taskDescription.getText().toString();
                 int itemIsCompleted = isCompleted.isChecked() == true ? 1 : 0;
                 int itemCompletionDate = datePickerTimeToTimeStamp(completionDate.getYear(), completionDate.getMonth(), completionDate.getDayOfMonth(), 0, 0, 0);
+                // Check if item is not null if so then update data to database and check if update has worked or not
                 if(item != null) {
                     Boolean hasUpdatedItem = MainActivity.getDB().onUpdateData(item.getTaskID(), itemTaskTitle, itemTaskDescription, itemCompletionDate, itemIsCompleted);
                     if(hasUpdatedItem) {
@@ -152,7 +157,7 @@ public class DetailsActivity extends AppCompatActivity {
                     } else {
                         Toast.makeText(DetailsActivity.this, "Entry " + itemTaskTitle + " has not updated.", Toast.LENGTH_SHORT).show();
                     }
-                } else {
+                } else { // Else must be insert data, insert data from the UI/widgets, check if insert has worked or not
                     Boolean hasInsertedItem = MainActivity.getDB().onInsertData(itemTaskTitle, itemTaskDescription, itemCompletionDate, itemIsCompleted);
                     if(hasInsertedItem) {
                         Toast.makeText(DetailsActivity.this, "Entry " + itemTaskTitle + " inserted.", Toast.LENGTH_SHORT).show();
@@ -160,29 +165,15 @@ public class DetailsActivity extends AppCompatActivity {
                         Toast.makeText(DetailsActivity.this, "Entry " + itemTaskTitle + " has not been inserted.", Toast.LENGTH_SHORT).show();
                     }
                 }
-                /*if(MainActivity.getDB().onHasDataInTable(item.getTaskID() == -1 ? 0 : item.getTaskID(), itemTaskTitle, itemTaskDescription, itemCompletionDate, itemIsCompleted)) {
-                    Boolean hasUpdatedItem = MainActivity.getDB().onUpdateData(item.getTaskID(), itemTaskTitle, itemTaskDescription, itemCompletionDate, itemIsCompleted);
-                    if(hasUpdatedItem) {
-                        Toast.makeText(DetailsActivity.this, "Entry " + itemTaskTitle + " updated.", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(DetailsActivity.this, "Entry " + itemTaskTitle + " has not updated.", Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-                    Boolean hasInsertedItem = MainActivity.getDB().onInsertData(itemTaskTitle, itemTaskDescription, itemCompletionDate, itemIsCompleted);
-                    if(hasInsertedItem) {
-                        Toast.makeText(DetailsActivity.this, "Entry " + itemTaskTitle + " inserted.", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(DetailsActivity.this, "Entry " + itemTaskTitle + " has not been inserted.", Toast.LENGTH_SHORT).show();
-                    }
-                }*/
                 finish();
             }
         });
 
+        // On Click Listener for the delete button
         deleteItemButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //String itemToDelete = taskTitle.getText().toString();
+                // Delete data and check if it has worked or not
                 Boolean hasDeletedItem = MainActivity.getDB().onDeleteData(item.getTaskID());
                 if(hasDeletedItem) {
                     Toast.makeText(DetailsActivity.this, "Entry " + item.getTaskTitle() + " deleted.", Toast.LENGTH_SHORT).show();
@@ -192,6 +183,5 @@ public class DetailsActivity extends AppCompatActivity {
                 finish();
             }
         });
-
     }
 }
