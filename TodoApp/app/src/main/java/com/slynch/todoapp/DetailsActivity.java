@@ -47,6 +47,20 @@ public class DetailsActivity extends AppCompatActivity {
         }
     };
 
+    int datePickerTimeToTimeStamp(int year, int month, int day, int hour, int minute, int second) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.YEAR, year);
+        calendar.set(Calendar.MONTH, month);
+        calendar.set(Calendar.DAY_OF_MONTH, day);
+        calendar.set(Calendar.HOUR, hour);
+        calendar.set(Calendar.MINUTE, minute);
+        calendar.set(Calendar.SECOND, second);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return (int)(calendar.getTimeInMillis() / 1000L);
+    }
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,8 +75,6 @@ public class DetailsActivity extends AppCompatActivity {
         deleteItemButton = (ImageButton)findViewById(R.id.deleteTodoItemButton);
 
         TodoItem item = (TodoItem) getIntent().getSerializableExtra("todoItemClicked");
-        //Bundle bundle = getIntent().getBundleExtra("itemClicked");
-        //TodoItem item = new TodoItem(bundle.getString("taskTitle"), bundle.getString("taskDescription"), bundle.getInt("completionDate"), bundle.getInt("isCompleted"));
 
         if (item != null) {
             taskTitle.setText(item.getTaskTitle());
@@ -75,6 +87,8 @@ public class DetailsActivity extends AppCompatActivity {
             int day = calendar.get(calendar.DAY_OF_MONTH);
             Log.d(TAG, "Date in UNIX: " + item.getCompletionDate());
             completionDate.init(year, month, day, null);
+        } else {
+            isCompleted.setVisibility(View.GONE);
         }
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.bottom_navigation);
@@ -96,8 +110,8 @@ public class DetailsActivity extends AppCompatActivity {
                         break;
 
                     case R.id.navigation_todo_details:
-                        //Intent intentTodoDetails = new Intent(DetailsActivity.this, DetailsActivity.class);
-                        //startActivity(intentTodoDetails);
+                        finish();
+                        startActivity(getIntent());
                         break;
                 }
                 return false;
@@ -107,38 +121,32 @@ public class DetailsActivity extends AppCompatActivity {
         isCompleted.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(isCompleted.isChecked()) {
-                    String itemTaskTitle = taskTitle.getText().toString();
-                    String itemTaskDescription = taskDescription.getText().toString();
-                    int itemCompletionDate = completionDate.getYear() * 10000 + completionDate.getMonth() * 100 + completionDate.getYear() % 100;
-                    Log.d(TAG, "Date in UNIX: " + itemCompletionDate);
-                    int itemIsCompleted = isCompleted.isChecked() == true ? 1 : 0;
-                    Boolean hasUpdatedItem = MainActivity.getDB().onUpdateData(itemTaskTitle, itemTaskDescription, itemCompletionDate, itemIsCompleted);
+                String itemTaskTitle = taskTitle.getText().toString();
+                String itemTaskDescription = taskDescription.getText().toString();
+                int itemIsCompleted = isCompleted.isChecked() == true ? 1 : 0;
+                int itemCompletionDate = datePickerTimeToTimeStamp(completionDate.getYear(), completionDate.getMonth(), completionDate.getDayOfMonth(), 0, 0, 0);
+
+                if(MainActivity.getDB().onHasDataInTable(item.getTaskID(), item.getTaskTitle(), item.getTaskDescription(), item.getCompletionDate(), itemIsCompleted)) {
+                    Boolean hasUpdatedItem = MainActivity.getDB().onUpdateData(item.getTaskID(), item.getTaskTitle(), item.getTaskDescription(), item.getCompletionDate(), itemIsCompleted);
                     if(hasUpdatedItem) {
                         Toast.makeText(DetailsActivity.this, "Entry " + itemTaskTitle + " updated.", Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(DetailsActivity.this, "Entry " + itemTaskTitle + " has not updated.", Toast.LENGTH_SHORT).show();
                     }
-                    finish();
                 }
+                finish();
             }
         });
 
         updateItemButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                /*try {
-
-                } catch (Exception e) {
-
-                }*/
-                Calendar calendar = Calendar.getInstance();
                 String itemTaskTitle = taskTitle.getText().toString();
                 String itemTaskDescription = taskDescription.getText().toString();
-                int itemCompletionDate = completionDate.getYear() * 10000 + completionDate.getMonth() * 100 + completionDate.getYear() % 100;
                 int itemIsCompleted = isCompleted.isChecked() == true ? 1 : 0;
-                if(MainActivity.getDB().onHasDataInTable(itemTaskTitle, itemTaskDescription, itemCompletionDate, itemIsCompleted)) {
-                    Boolean hasUpdatedItem = MainActivity.getDB().onUpdateData(itemTaskTitle, itemTaskDescription, itemCompletionDate, itemIsCompleted);
+                int itemCompletionDate = datePickerTimeToTimeStamp(completionDate.getYear(), completionDate.getMonth(), completionDate.getDayOfMonth(), 0, 0, 0);
+                if(item != null) {
+                    Boolean hasUpdatedItem = MainActivity.getDB().onUpdateData(item.getTaskID(), itemTaskTitle, itemTaskDescription, itemCompletionDate, itemIsCompleted);
                     if(hasUpdatedItem) {
                         Toast.makeText(DetailsActivity.this, "Entry " + itemTaskTitle + " updated.", Toast.LENGTH_SHORT).show();
                     } else {
@@ -152,6 +160,21 @@ public class DetailsActivity extends AppCompatActivity {
                         Toast.makeText(DetailsActivity.this, "Entry " + itemTaskTitle + " has not been inserted.", Toast.LENGTH_SHORT).show();
                     }
                 }
+                /*if(MainActivity.getDB().onHasDataInTable(item.getTaskID() == -1 ? 0 : item.getTaskID(), itemTaskTitle, itemTaskDescription, itemCompletionDate, itemIsCompleted)) {
+                    Boolean hasUpdatedItem = MainActivity.getDB().onUpdateData(item.getTaskID(), itemTaskTitle, itemTaskDescription, itemCompletionDate, itemIsCompleted);
+                    if(hasUpdatedItem) {
+                        Toast.makeText(DetailsActivity.this, "Entry " + itemTaskTitle + " updated.", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(DetailsActivity.this, "Entry " + itemTaskTitle + " has not updated.", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Boolean hasInsertedItem = MainActivity.getDB().onInsertData(itemTaskTitle, itemTaskDescription, itemCompletionDate, itemIsCompleted);
+                    if(hasInsertedItem) {
+                        Toast.makeText(DetailsActivity.this, "Entry " + itemTaskTitle + " inserted.", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(DetailsActivity.this, "Entry " + itemTaskTitle + " has not been inserted.", Toast.LENGTH_SHORT).show();
+                    }
+                }*/
                 finish();
             }
         });
@@ -159,12 +182,12 @@ public class DetailsActivity extends AppCompatActivity {
         deleteItemButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String itemToDelete = taskTitle.getText().toString();
-                Boolean hasDeletedItem = MainActivity.getDB().onDeleteData(itemToDelete);
+                //String itemToDelete = taskTitle.getText().toString();
+                Boolean hasDeletedItem = MainActivity.getDB().onDeleteData(item.getTaskID());
                 if(hasDeletedItem) {
-                    Toast.makeText(DetailsActivity.this, "Entry " + itemToDelete + " deleted.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(DetailsActivity.this, "Entry " + item.getTaskTitle() + " deleted.", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(DetailsActivity.this, "Entry " + itemToDelete + " has not deleted.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(DetailsActivity.this, "Entry " + item.getTaskTitle() + " has not deleted.", Toast.LENGTH_SHORT).show();
                 }
                 finish();
             }

@@ -27,30 +27,9 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TODO_ITEM_TABLE);
     }
 
-    public void onDelete() {
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TODO_ITEM_TABLE, null, null);
-    }
-
-    /*@Override
-    public void onCreate(SQLiteDatabase db) {
-        db.execSQL("create Table TodoItemDetails(name TEXT primary key, contact TEXT, dob TEXT)");
-    }*/
-
-    /*@Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("drop Table if exists TodoItemDetails");
-    }*/
-
-    public Boolean onHasDataInTable(String taskTitle, String taskDescription, int completionDate, int isCompleted) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery("Select * from " + TODO_ITEM_TABLE + " where name = ?", new String[]{taskTitle});
-        return cursor.getCount() > 0;
-    }
-
-    public Boolean onHasDataInTable(int taskID) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery("Select * from " + TODO_ITEM_TABLE + " where id = ?", new String[]{String.valueOf(taskID)});
+    public Boolean onHasDataInTable(int taskID, String taskTitle, String taskDescription, int completionDate, int isCompleted) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TODO_ITEM_TABLE + " WHERE " + TODO_TASK_ID + "=?", new String[]{String.valueOf(taskID)});
         return cursor.getCount() > 0;
     }
 
@@ -63,65 +42,37 @@ public class DBHelper extends SQLiteOpenHelper {
         contentValues.put(TODO_TASK_COMPLETION_DATE, completionDate);
         contentValues.put(TODO_TASK_IS_COMPLETED, isCompleted);
         return db.insert(TODO_ITEM_TABLE, null, contentValues) != -1;
-        //long result =
-        /*if (result == -1) {
-            return false;
-        } else {
-            return true;
-        }*/
     }
 
 
-    public Boolean onUpdateData(String taskTitle, String taskDescription, int completionDate, int isCompleted) {
+    public Boolean onUpdateData(int taskID, String taskTitle, String taskDescription, int completionDate, int isCompleted) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(TODO_TASK_TITLE, taskTitle);
         contentValues.put(TODO_TASK_DESCRIPTION, taskDescription);
         contentValues.put(TODO_TASK_COMPLETION_DATE, completionDate);
         contentValues.put(TODO_TASK_IS_COMPLETED, isCompleted);
-        Cursor cursor = db.rawQuery("Select * from " + TODO_ITEM_TABLE + " where name = ?", new String[]{taskTitle});
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TODO_ITEM_TABLE + " WHERE " + TODO_TASK_ID + "=?", new String[]{String.valueOf(taskID)});
         if(cursor.getCount() <= 0) {
             return false;
         }
-        return db.update(TODO_ITEM_TABLE, contentValues,  TODO_TASK_TITLE + "=?", new String[]{taskTitle}) != -1;
-
-        /*if (cursor.getCount() > 0) {
-            //long result =
-            db.update("TodoItemDetails", contentValues, "taskTitle=?", new String[]{taskTitle}) != -1;
-            if (result == -1) {
-                return false;
-            } else {
-                return true;
-            }
-        } else {
-            return false;
-        }*/
+        return db.update(TODO_ITEM_TABLE, contentValues,  TODO_TASK_ID + "=?", new String[]{String.valueOf(taskID)}) != -1;
     }
 
-
-    public Boolean onDeleteData(String taskTitle) {
+    // Delete the task from the table
+    public Boolean onDeleteData(int taskID) {
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery("Select * from " + TODO_ITEM_TABLE + " where name = ?", new String[]{taskTitle});
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TODO_ITEM_TABLE + " WHERE " + TODO_TASK_ID + "=?", new String[]{String.valueOf(taskID)});
         if(cursor.getCount() <= 0) {
             return false;
         }
-        return db.delete(TODO_ITEM_TABLE, TODO_TASK_TITLE + "=?", new String[]{taskTitle}) != -1;
-
-        /*if (cursor.getCount() > 0) {
-            long result = db.delete("TodoItemDetails", "taskTitle=?", new String[]{taskTitle});
-            if (result == -1) {
-                return false;
-            } else {
-                return true;
-            }
-        } else {
-            return false;
-        }*/
+        return db.delete(TODO_ITEM_TABLE, TODO_TASK_ID + "=?", new String[]{String.valueOf(taskID)}) != -1;
     }
 
+    // Get data from the table within the database
     public Cursor onGetData() {
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery("Select * from " + TODO_ITEM_TABLE, null);
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TODO_ITEM_TABLE, null);
         return cursor;
     }
 }

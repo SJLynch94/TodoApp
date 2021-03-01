@@ -10,8 +10,11 @@ import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
+import android.widget.ImageButton;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -31,6 +34,7 @@ public class TodoItemAdapter extends ArrayAdapter<TodoItem> {
         TextView description;
         Switch isCompleted;
         TextView completionDate;
+        ImageButton deleteTodoItemButton;
     }
 
     public TodoItemAdapter(Context context, int resource, TodoItem[] todoItems) {
@@ -46,6 +50,7 @@ public class TodoItemAdapter extends ArrayAdapter<TodoItem> {
     }
 
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+        int taskID = getItem(position).getTaskID();
         String title = getItem(position).getTaskTitle();
         String description = getItem(position).getTaskDescription();
         int completionDate = getItem(position).getCompletionDate();
@@ -62,6 +67,7 @@ public class TodoItemAdapter extends ArrayAdapter<TodoItem> {
             viewHolder.description = (TextView) view.findViewById(R.id.taskDescriptionEditText);
             viewHolder.isCompleted = (Switch) view.findViewById(R.id.isCompletedSwitch);
             viewHolder.completionDate = (TextView) view.findViewById(R.id.completionDateText);
+            viewHolder.deleteTodoItemButton = (ImageButton) view.findViewById(R.id.deleteTodoItemButton);
             view.setTag(viewHolder);
         }
         else {
@@ -86,8 +92,32 @@ public class TodoItemAdapter extends ArrayAdapter<TodoItem> {
         viewHolder.description.setText(description);
         viewHolder.isCompleted.setChecked(isCompleted == 1 ? true : false);
         viewHolder.completionDate.setText(date.toString());
-        //viewHolder.completionDate.init(year, month, day, null);
 
+        viewHolder.isCompleted.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(MainActivity.getDB().onHasDataInTable(taskID, title, description, (int)date.getTime(), isCompleted)) {
+                    Boolean hasUpdatedItem = MainActivity.getDB().onUpdateData(taskID, title, description, (int)date.getTime(), viewHolder.isCompleted.isChecked() == true ? 1 : 0);
+                    if(hasUpdatedItem) {
+                        Toast.makeText(v.getContext(), "Entry " + title + " updated.", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(v.getContext(), "Entry " + title + " has not updated.", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+        });
+
+        viewHolder.deleteTodoItemButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Boolean hasDeletedItem = MainActivity.getDB().onDeleteData(taskID);
+                if(hasDeletedItem) {
+                    Toast.makeText(v.getContext(), "Entry " + title + " deleted.", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(v.getContext(), "Entry " + title + " has not deleted.", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
 
         return view;
     }
