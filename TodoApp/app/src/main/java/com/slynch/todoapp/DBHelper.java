@@ -29,7 +29,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public Boolean onHasDataInTable(int taskID, String taskTitle, String taskDescription, int completionDate, int isCompleted) {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TODO_ITEM_TABLE + " WHERE " + TODO_TASK_ID + "=?", new String[]{String.valueOf(taskID)});
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TODO_ITEM_TABLE + " WHERE " + TODO_TASK_ID + "=?", new String[]{Integer.toString(taskID)});
         return cursor.getCount() > 0;
     }
 
@@ -52,21 +52,21 @@ public class DBHelper extends SQLiteOpenHelper {
         contentValues.put(TODO_TASK_DESCRIPTION, taskDescription);
         contentValues.put(TODO_TASK_COMPLETION_DATE, completionDate);
         contentValues.put(TODO_TASK_IS_COMPLETED, isCompleted);
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TODO_ITEM_TABLE + " WHERE " + TODO_TASK_ID + "=?", new String[]{String.valueOf(taskID)});
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TODO_ITEM_TABLE + " WHERE " + TODO_TASK_ID + "=?", new String[]{Integer.toString(taskID)});
         if(cursor.getCount() <= 0) {
             return false;
         }
-        return db.update(TODO_ITEM_TABLE, contentValues,  TODO_TASK_ID + "=?", new String[]{String.valueOf(taskID)}) != -1;
+        return db.update(TODO_ITEM_TABLE, contentValues,  TODO_TASK_ID + "=?", new String[]{Integer.toString(taskID)}) != -1;
     }
 
     // Delete the task from the table
     public Boolean onDeleteData(int taskID) {
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TODO_ITEM_TABLE + " WHERE " + TODO_TASK_ID + "=?", new String[]{String.valueOf(taskID)});
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TODO_ITEM_TABLE + " WHERE " + TODO_TASK_ID + "=?", new String[]{Integer.toString(taskID)});
         if(cursor.getCount() <= 0) {
             return false;
         }
-        return db.delete(TODO_ITEM_TABLE, TODO_TASK_ID + "=?", new String[]{String.valueOf(taskID)}) != -1;
+        return db.delete(TODO_ITEM_TABLE, TODO_TASK_ID + "=?", new String[]{Integer.toString(taskID)}) != -1;
     }
 
     // Get data from the table within the database

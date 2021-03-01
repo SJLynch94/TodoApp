@@ -99,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
                 int counter = 0;
                 while(resultData.moveToNext())
                 {
+                    Log.d(TAG, "Items: " + resultData.getString(0) + " " + resultData.getString(1) + " " + resultData.getInt(2) + " " + resultData.getInt(3));
                     TodoItem item = new TodoItem(resultData.getInt(0), resultData.getString(1), resultData.getString(2), resultData.getInt(3), resultData.getInt(4));
                     mDatabaseItems[counter] = item;
                     ++counter;
