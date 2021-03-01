@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DBHelper extends SQLiteOpenHelper {
 
+    // Constants
     public static final String TODO_ITEM_TABLE = "TodoItemDetails";
     public static final String TODO_TASK_ID = "taskID";
     public static final String TODO_TASK_TITLE = "taskTitle";
@@ -19,12 +20,20 @@ public class DBHelper extends SQLiteOpenHelper {
         super(context, "TodoItemDatabase.db",null,1);
     }
 
+    @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE " +  TODO_ITEM_TABLE + "(" + TODO_TASK_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + TODO_TASK_TITLE + " TEXT, " + TODO_TASK_DESCRIPTION + " TEXT, " + TODO_TASK_COMPLETION_DATE + " INTEGER, " + TODO_TASK_IS_COMPLETED + " INTEGER)");
     }
 
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + TODO_ITEM_TABLE);
+        onCreate(db);
+    }
+
+    public void onDelete() {
+        SQLiteDatabase db = getWritableDatabase();
+        //db.execSQL("DROP TABLE IF EXISTS " + TODO_ITEM_TABLE);
+        //db.delete(TODO_ITEM_TABLE, null, null);
     }
 
     public Boolean onHasDataInTable(int taskID, String taskTitle, String taskDescription, int completionDate, int isCompleted) {
@@ -72,7 +81,8 @@ public class DBHelper extends SQLiteOpenHelper {
     // Get data from the table within the database
     public Cursor onGetData() {
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TODO_ITEM_TABLE, null);
+        //Cursor cursor = db.rawQuery("SELECT * FROM " + TODO_ITEM_TABLE, null);
+        Cursor cursor = db.rawQuery("SELECT " + TODO_TASK_ID + ", " + TODO_TASK_TITLE + ", " + TODO_TASK_DESCRIPTION + ", " + TODO_TASK_COMPLETION_DATE + ", " + TODO_TASK_IS_COMPLETED + " FROM " + TODO_ITEM_TABLE, null);
         return cursor;
     }
 }

@@ -28,6 +28,7 @@ public class TodoItemAdapter extends ArrayAdapter<TodoItem> {
     private Context mContext;
     private int mResource;
     private int lastPosition = -1;
+    private ViewHolder viewHolder;
 
     static class ViewHolder {
         TextView title;
@@ -43,12 +44,6 @@ public class TodoItemAdapter extends ArrayAdapter<TodoItem> {
         mResource = resource;
     }
 
-    public TodoItemAdapter(Context context, int resource, ArrayList<TodoItem> todoItems) {
-        super(context, resource, todoItems);
-        mContext = context;
-        mResource = resource;
-    }
-
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
         int taskID = getItem(position).getTaskID();
         String title = getItem(position).getTaskTitle();
@@ -57,7 +52,6 @@ public class TodoItemAdapter extends ArrayAdapter<TodoItem> {
         int isCompleted = getItem(position).getIsCompleted();
 
         View view = convertView;
-        ViewHolder viewHolder;
 
         if(view == null) {
             final LayoutInflater layoutInflater = LayoutInflater.from(mContext);
@@ -120,5 +114,9 @@ public class TodoItemAdapter extends ArrayAdapter<TodoItem> {
         });
 
         return view;
+    }
+
+    public void updateItem(int position, TodoItem item) {
+
     }
 }

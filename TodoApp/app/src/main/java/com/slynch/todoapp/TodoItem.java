@@ -3,12 +3,14 @@ package com.slynch.todoapp;
 import java.io.Serializable;
 
 public class TodoItem implements Serializable {
+    // Member Variables for the TodoItem
     private int mTaskID;
     private String mTaskTitle;
     private String mTaskDescription;
     private int mCompletionDate;
     private int mIsCompleted;
 
+    // Constructor
     public TodoItem(int taskID, String taskTitle, String taskDescription, int date, int isCompleted) {
         this.mTaskID = taskID;
         this.mTaskTitle = taskTitle;
@@ -28,6 +30,7 @@ public class TodoItem implements Serializable {
                 '}';
     }
 
+    // Getters and Setters
     public int getTaskID() {return mTaskID;}
     public void setTaskID(int taskID) {this.mTaskID = taskID;}
 

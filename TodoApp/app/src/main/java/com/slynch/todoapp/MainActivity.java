@@ -6,6 +6,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.os.Environment;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,6 +20,7 @@ import android.os.Bundle;
 import android.widget.Toast;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -25,13 +28,15 @@ import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity {
 
+    // Member variables
     private TextView mAppTitle;
     private ImageButton mAddTodoItem;
     private ListView mListView;
     private TodoItem[] mDatabaseItems;
-    private ArrayList<TodoItem> mDatabaseList;
-    //private RecyclerView.Recycler mRecyclerListView;
+    private int mLastItemUpdate = -1;
+    private TodoItemAdapter mListViewAdapter;
 
+    // Static Database
     private static DBHelper mTodoItemsDatabase;
     public static DBHelper getDB() { return mTodoItemsDatabase; }
 
@@ -67,6 +72,12 @@ public class MainActivity extends AppCompatActivity {
         mAddTodoItem = (ImageButton) findViewById(R.id.addTodoItemButton);
         mTodoItemsDatabase = new DBHelper(this);
         mergeSort = new MergeSort();
+
+        /*File data = Environment.getDataDirectory();
+        String currentDBPath = "/data/com.slynch.todoapp/databases/" + "TodoItemDatabase.db";
+        File currentDB = new File(data, currentDBPath);
+        boolean deleted = SQLiteDatabase.deleteDatabase(currentDB);*/
+
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.bottom_navigation);
         navigation.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener);
@@ -108,10 +119,12 @@ public class MainActivity extends AppCompatActivity {
 
             mergeSort.sort(mDatabaseItems, 0, mDatabaseItems.length - 1);
 
-            mListView.setAdapter(new TodoItemAdapter(this, R.layout.row, mDatabaseItems));
+            mListViewAdapter = new TodoItemAdapter(this, R.layout.row, mDatabaseItems);
+            mListView.setAdapter(mListViewAdapter);//(new TodoItemAdapter(this, R.layout.row, mDatabaseItems));
             mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    mLastItemUpdate = position;
                     Toast.makeText(MainActivity.this, "Clicked Item: " + mDatabaseItems[position].toString(), Toast.LENGTH_SHORT).show();
                     Intent intentTodoDetails = new Intent(MainActivity.this, DetailsActivity.class);
                     Bundle itemBundle = new Bundle();
@@ -125,6 +138,7 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(MainActivity.this, "No Todo Item Entries Exist. Please create a Todo Item.", Toast.LENGTH_SHORT).show();
         }
 
+        // On Click Listener for new TodoItem to be
         mAddTodoItem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -132,5 +146,13 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intentTodoDetails);
             }
         });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mLastItemUpdate != -1) {
+            mListViewAdapter.updateItem(mLastItemUpdate, mDatabaseItems[mLastItemUpdate]);
+        }
     }
 }
