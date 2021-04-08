@@ -17,6 +17,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -29,6 +30,8 @@ public class TodoItemAdapter extends ArrayAdapter<TodoItem> {
     private int mResource;
     private TodoItemAdapter mAdapter;
     private TodoItem[] mDataArray;
+    private List<TodoItem> mDataList;
+    private ArrayList<TodoItem> mDataArrayList;
     private int mLastPosition = -1;
     private ViewHolder mViewHolder;
 
@@ -47,6 +50,22 @@ public class TodoItemAdapter extends ArrayAdapter<TodoItem> {
         mContext = context;
         mResource = resource;
         mDataArray = todoItems;
+        mAdapter = this;
+    }
+
+    public TodoItemAdapter(Context context, int resource, List<TodoItem> todoItems) {
+        super(context, resource, todoItems);
+        mContext = context;
+        mResource = resource;
+        mDataList = todoItems;
+        mAdapter = this;
+    }
+
+    public TodoItemAdapter(Context context, int resource, ArrayList<TodoItem> todoItems) {
+        super(context, resource, todoItems);
+        mContext = context;
+        mResource = resource;
+        mDataArrayList = todoItems;
         mAdapter = this;
     }
 
@@ -107,9 +126,9 @@ public class TodoItemAdapter extends ArrayAdapter<TodoItem> {
                 // Update and check if it has worked or not
                 Boolean hasUpdatedItem = MainActivity.getDB().onUpdateData(taskID, title, description, completionDate, mViewHolder.isCompleted.isChecked() == true ? 1 : 0);
                 if(hasUpdatedItem) {
-                    Toast.makeText(v.getContext(), "Entry " + title + " updated.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(v.getContext(), "Entry " + taskID + " " + title + " updated.", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(v.getContext(), "Entry " + title + " has not updated.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(v.getContext(), "Entry " + taskID + " " + title + " has not updated.", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -121,10 +140,11 @@ public class TodoItemAdapter extends ArrayAdapter<TodoItem> {
                 // Delete and check if it has worked or not
                 Boolean hasDeletedItem = MainActivity.getDB().onDeleteData(taskID);
                 if(hasDeletedItem) {
-                    Toast.makeText(v.getContext(), "Entry " + title + " deleted.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(v.getContext(), "Entry " + taskID + " " +title + " deleted.", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(v.getContext(), "Entry " + title + " has not deleted.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(v.getContext(), "Entry " + taskID + " " + title + " has not deleted.", Toast.LENGTH_SHORT).show();
                 }
+                mAdapter.notifyDataSetChanged();
             }
         });
 

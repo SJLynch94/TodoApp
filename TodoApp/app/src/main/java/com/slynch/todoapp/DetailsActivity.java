@@ -93,6 +93,7 @@ public class DetailsActivity extends AppCompatActivity {
             completionDate.init(year, month, day, null);
         } else {
             isCompleted.setVisibility(View.GONE);
+            deleteItemButton.setVisibility(View.GONE);
         }
 
         // Find the bottom navigation view, assign it and set the menu item to be 1 for Details Activity
@@ -132,10 +133,12 @@ public class DetailsActivity extends AppCompatActivity {
                 // Update database with the the new is checked input and test to see if update has worked or not
                 Boolean hasUpdatedItem = MainActivity.getDB().onUpdateData(item.getTaskID(), item.getTaskTitle(), item.getTaskDescription(), item.getCompletionDate(), itemIsCompleted);
                 if(hasUpdatedItem) {
-                    Toast.makeText(DetailsActivity.this, "Entry " + item.getTaskTitle() + " updated.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(DetailsActivity.this, "Entry " + item.getTaskID() + " " + item.getTaskTitle() + " updated.", Toast.LENGTH_SHORT).show();
+                    // Update array/array list
                 } else {
-                    Toast.makeText(DetailsActivity.this, "Entry " + item.getTaskTitle() + " has not updated.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(DetailsActivity.this, "Entry " + item.getTaskID() + " " + item.getTaskTitle() + " has not updated.", Toast.LENGTH_SHORT).show();
                 }
+                //mAdapter.notifyDataSetChanged();
                 finish();
             }
         });
@@ -153,18 +156,21 @@ public class DetailsActivity extends AppCompatActivity {
                 if(item != null) {
                     Boolean hasUpdatedItem = MainActivity.getDB().onUpdateData(item.getTaskID(), itemTaskTitle, itemTaskDescription, itemCompletionDate, itemIsCompleted);
                     if(hasUpdatedItem) {
-                        Toast.makeText(DetailsActivity.this, "Entry " + itemTaskTitle + " updated.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(DetailsActivity.this, "Entry " + item.getTaskID() + " " + itemTaskTitle + " updated.", Toast.LENGTH_SHORT).show();
                     } else {
-                        Toast.makeText(DetailsActivity.this, "Entry " + itemTaskTitle + " has not updated.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(DetailsActivity.this, "Entry " + item.getTaskID() + " " + itemTaskTitle + " has not updated.", Toast.LENGTH_SHORT).show();
+                        // Update array/array list
                     }
                 } else { // Else must be insert data, insert data from the UI/widgets, check if insert has worked or not
                     Boolean hasInsertedItem = MainActivity.getDB().onInsertData(itemTaskTitle, itemTaskDescription, itemCompletionDate, itemIsCompleted);
                     if(hasInsertedItem) {
-                        Toast.makeText(DetailsActivity.this, "Entry " + itemTaskTitle + " inserted.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(DetailsActivity.this, "Entry " + MainActivity.getDB().onGetData().getCount() + 1 + " " + itemTaskTitle + " inserted.", Toast.LENGTH_SHORT).show();
+                        // Insert into array/array list
                     } else {
-                        Toast.makeText(DetailsActivity.this, "Entry " + itemTaskTitle + " has not been inserted.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(DetailsActivity.this, "Entry " + item.getTaskID() + " " + itemTaskTitle + " has not been inserted.", Toast.LENGTH_SHORT).show();
                     }
                 }
+                //mAdapter.notifyDataSetChanged();
                 finish();
             }
         });
@@ -176,10 +182,12 @@ public class DetailsActivity extends AppCompatActivity {
                 // Delete data and check if it has worked or not
                 Boolean hasDeletedItem = MainActivity.getDB().onDeleteData(item.getTaskID());
                 if(hasDeletedItem) {
-                    Toast.makeText(DetailsActivity.this, "Entry " + item.getTaskTitle() + " deleted.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(DetailsActivity.this, "Entry " + item.getTaskID() + " " + item.getTaskTitle() + " deleted.", Toast.LENGTH_SHORT).show();
+                    // Remove data from array/array list
                 } else {
-                    Toast.makeText(DetailsActivity.this, "Entry " + item.getTaskTitle() + " has not deleted.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(DetailsActivity.this, "Entry " + item.getTaskID() + " " + item.getTaskTitle() + " has not deleted.", Toast.LENGTH_SHORT).show();
                 }
+                //mAdapter.notifyDataSetChanged();
                 finish();
             }
         });

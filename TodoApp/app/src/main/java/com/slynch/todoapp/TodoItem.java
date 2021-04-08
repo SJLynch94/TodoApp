@@ -1,8 +1,14 @@
 package com.slynch.todoapp;
 
-import java.io.Serializable;
+//import android.os.Build;
 
-public class TodoItem implements Serializable {
+import java.io.Serializable;
+//import java.util.Comparator;
+
+//import androidx.annotation.RequiresApi;
+
+//@RequiresApi(api = Build.VERSION_CODES.N)
+public class TodoItem implements Serializable/*, Comparable<TodoItem>*/ {
     // Member Variables for the TodoItem
     private int mTaskID;
     private String mTaskTitle;
@@ -30,6 +36,9 @@ public class TodoItem implements Serializable {
                 '}';
     }
 
+    /*public static final Comparator<TodoItem> COMPLETE_DATE_COMPARATOR = Comparator
+            .comparing(TodoItem::getCompletionDate);*/
+
     // Getters and Setters
     public int getTaskID() {return mTaskID;}
     public void setTaskID(int taskID) {this.mTaskID = taskID;}
@@ -45,4 +54,9 @@ public class TodoItem implements Serializable {
 
     public int getIsCompleted() {return this.mIsCompleted;}
     public void setIsCompleted(int isCompleted) {this.mIsCompleted = isCompleted;}
+
+    /*@Override
+    public int compareTo(TodoItem o) {
+        return this.getCompletionDate() < o.getCompletionDate() ? -1 : (this.getCompletionDate() == o.getCompletionDate() ? 0 : 1);
+    }*/
 }

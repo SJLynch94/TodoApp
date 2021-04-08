@@ -1,7 +1,12 @@
 package com.slynch.todoapp;
 
+//import android.os.Build;
+
+//import androidx.annotation.RequiresApi;
+
 public class MergeSort {
     // Merge the sub-arrays that are fro left to mid and mid to right
+    //@RequiresApi(api = Build.VERSION_CODES.N)
     public void merge(TodoItem[] data, int left, int mid, int right) {
         // Calculate sub-array sizes
         int leftArraySize = mid - left + 1;
