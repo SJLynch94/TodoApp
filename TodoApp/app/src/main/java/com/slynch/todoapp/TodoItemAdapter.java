@@ -141,6 +141,7 @@ public class TodoItemAdapter extends ArrayAdapter<TodoItem> {
                 Boolean hasDeletedItem = MainActivity.getDB().onDeleteData(taskID);
                 if(hasDeletedItem) {
                     Toast.makeText(v.getContext(), "Entry " + taskID + " " +title + " deleted.", Toast.LENGTH_SHORT).show();
+                    mDataList.remove(position);
                 } else {
                     Toast.makeText(v.getContext(), "Entry " + taskID + " " + title + " has not deleted.", Toast.LENGTH_SHORT).show();
                 }

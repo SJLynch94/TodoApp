@@ -1,6 +1,7 @@
 package com.slynch.todoapp;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -10,6 +11,7 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Switch;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -18,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class DetailsActivity extends AppCompatActivity {
@@ -26,6 +29,7 @@ public class DetailsActivity extends AppCompatActivity {
     private EditText taskTitle;
     private EditText taskDescription;
     private DatePicker completionDate;
+    private TimePicker completionTime;
     private Switch isCompleted;
     private ImageButton updateItemButton;
     private ImageButton deleteItemButton;
@@ -61,6 +65,7 @@ public class DetailsActivity extends AppCompatActivity {
         return (int)(calendar.getTimeInMillis() / 1000L);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,6 +76,7 @@ public class DetailsActivity extends AppCompatActivity {
         taskTitle = (EditText)findViewById(R.id.taskTitleEditText);
         taskDescription = (EditText)findViewById(R.id.taskDescriptionEditText);
         completionDate = (DatePicker)findViewById(R.id.completionDatePicker);
+        completionTime = (TimePicker)findViewById(R.id.completionTimePicker);
         isCompleted = (Switch) findViewById(R.id.isCompletedSwitch);
         updateItemButton = (ImageButton)findViewById(R.id.addTodoItemButton);
         deleteItemButton = (ImageButton)findViewById(R.id.deleteTodoItemButton);
@@ -89,12 +95,18 @@ public class DetailsActivity extends AppCompatActivity {
             int year = calendar.get(Calendar.YEAR);
             int month = calendar.get(Calendar.MONTH);
             int day = calendar.get(calendar.DAY_OF_MONTH);
+            int hour = calendar.get(calendar.HOUR_OF_DAY);
+            int minute = calendar.get(calendar.MINUTE);
+            int seconds = calendar.get(calendar.SECOND);
             Log.d(TAG, "Date in UNIX: " + item.getCompletionDate());
             completionDate.init(year, month, day, null);
+            completionTime.setHour(hour);
+            completionTime.setMinute(minute);
         } else {
             isCompleted.setVisibility(View.GONE);
             deleteItemButton.setVisibility(View.GONE);
         }
+        completionTime.setIs24HourView(true);
 
         // Find the bottom navigation view, assign it and set the menu item to be 1 for Details Activity
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.bottom_navigation);
@@ -151,7 +163,7 @@ public class DetailsActivity extends AppCompatActivity {
                 String itemTaskTitle = taskTitle.getText().toString();
                 String itemTaskDescription = taskDescription.getText().toString();
                 int itemIsCompleted = isCompleted.isChecked() == true ? 1 : 0;
-                int itemCompletionDate = datePickerTimeToTimeStamp(completionDate.getYear(), completionDate.getMonth(), completionDate.getDayOfMonth(), 0, 0, 0);
+                int itemCompletionDate = datePickerTimeToTimeStamp(completionDate.getYear(), completionDate.getMonth(), completionDate.getDayOfMonth(), completionTime.getHour(), completionTime.getMinute(), 0);
                 // Check if item is not null if so then update data to database and check if update has worked or not
                 if(item != null) {
                     Boolean hasUpdatedItem = MainActivity.getDB().onUpdateData(item.getTaskID(), itemTaskTitle, itemTaskDescription, itemCompletionDate, itemIsCompleted);

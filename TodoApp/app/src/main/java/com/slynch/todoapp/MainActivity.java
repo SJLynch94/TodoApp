@@ -21,14 +21,7 @@ import android.os.Bundle;
 import android.widget.Toast;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import java.io.File;
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -40,8 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Member variables to hold the array of data from the database, adapter for the list view
     private TodoItem[] mDatabaseItems;
-    //private List<TodoItem> mDatabaseItemsList;
-    private ArrayList<TodoItem> mDatabaseArrayList;
+    private ArrayList<TodoItem> mDatabaseList;
     private int mLastItemUpdate = -1;
     private TodoItemAdapter mListViewAdapter;
 
@@ -54,6 +46,9 @@ public class MainActivity extends AppCompatActivity {
     // Merge sort class to sort the data by completion date
     private static MergeSort mergeSort;
     public static MergeSort getMergeSort() { return mergeSort; }
+
+    private static MergeSortArrayList mergeSortArrayList;
+    public static MergeSortArrayList getMergeSortArrayList() { return mergeSortArrayList; }
 
     private static final String TAG = "MainActivity";
 
@@ -68,8 +63,8 @@ public class MainActivity extends AppCompatActivity {
         // Initialize DB and Merge Sort
         mTodoItemsDatabase = new DBHelper(this);
         mergeSort = new MergeSort();
-        //mDatabaseItemsList = new List<>();
-        mDatabaseArrayList = new ArrayList<>();
+        mergeSortArrayList = new MergeSortArrayList();
+
 
         // Find the bottom navigation view, assign it and set the menu item to be default 0
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.bottom_navigation);
@@ -101,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
             // Get data from database
             Cursor resultData = mTodoItemsDatabase.onGetData();
             if(resultData.getCount() != 0) {
-                mDatabaseArrayList = new ArrayList<>();
+                mDatabaseList = new ArrayList<>();
                 mDatabaseItems = new TodoItem[resultData.getCount()];
                 int counter = 0;
                 // Loop over database cursor data
@@ -110,8 +105,7 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, "Items: " + resultData.getInt(0) + ", " +resultData.getString(1) + ", " + resultData.getString(2) + ", " + resultData.getInt(3) + ", " + resultData.getInt(4));
                     TodoItem item = new TodoItem(resultData.getInt(0), resultData.getString(1), resultData.getString(2), resultData.getInt(3), resultData.getInt(4));
                     mDatabaseItems[counter] = item;
-                    //mDatabaseItemsList.add(item);
-                    mDatabaseArrayList.add(item);
+                    mDatabaseList.add(item);
                     ++counter;
                 }
             }
@@ -119,8 +113,11 @@ public class MainActivity extends AppCompatActivity {
             // Only sort if data array is not null
             if(mDatabaseItems != null) {
                 mergeSort.sort(mDatabaseItems, 0, mDatabaseItems.length - 1);
-                //mDatabaseArrayList.sort(TodoItem::getCompletionDate());
             }
+
+            /*if(mDatabaseList.size() != 0 && mDatabaseList != null) {
+                mergeSortArrayList.sort(mDatabaseList, 0, mDatabaseList.size() - 1);
+            }*/
 
             // Initialise adapter and set adapter to the list view
             mListViewAdapter = new TodoItemAdapter(this, R.layout.row, mDatabaseItems);
@@ -131,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     mLastItemUpdate = position;
                     Toast.makeText(MainActivity.this, "Clicked Item: " + mDatabaseItems[position].getTaskID() + " " + mDatabaseItems[position].getTaskTitle(), Toast.LENGTH_SHORT).show();
-                    Toast.makeText(MainActivity.this, "Clicked Item: " + mDatabaseArrayList.get(position).getTaskID() + " " + mDatabaseArrayList.get(position).getTaskTitle(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Clicked Item: " + mDatabaseList.get(position).getTaskID() + " " + mDatabaseList.get(position).getTaskTitle(), Toast.LENGTH_SHORT).show();
                     // Create Intent to load Details Activity, Create Bundle to pass the selected data over, put serialized data into Bundle and the Bundle into the Intent
                     Intent intentTodoDetails = new Intent(MainActivity.this, DetailsActivity.class);
                     Bundle itemBundle = new Bundle();
@@ -140,11 +137,11 @@ public class MainActivity extends AppCompatActivity {
                             mDatabaseItems[position].getTaskDescription(),
                             mDatabaseItems[position].getCompletionDate(),
                             mDatabaseItems[position].getIsCompleted());
-                    TodoItem itemFromArrayList = new TodoItem(mDatabaseArrayList.get(position).getTaskID(),
-                            mDatabaseArrayList.get(position).getTaskTitle(),
-                            mDatabaseArrayList.get(position).getTaskDescription(),
-                            mDatabaseArrayList.get(position).getCompletionDate(),
-                            mDatabaseArrayList.get(position).getIsCompleted());
+                    TodoItem itemFromArrayList = new TodoItem(mDatabaseList.get(position).getTaskID(),
+                            mDatabaseList.get(position).getTaskTitle(),
+                            mDatabaseList.get(position).getTaskDescription(),
+                            mDatabaseList.get(position).getCompletionDate(),
+                            mDatabaseList.get(position).getIsCompleted());
                     itemBundle.putSerializable("todoItemClicked", item);
                     intentTodoDetails.putExtras(itemBundle);
                     startActivity(intentTodoDetails);
@@ -163,6 +160,5 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intentTodoDetails);
             }
         });
-
     }
 }
