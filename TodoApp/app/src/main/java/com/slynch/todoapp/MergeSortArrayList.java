@@ -3,55 +3,68 @@ package com.slynch.todoapp;
 import java.util.ArrayList;
 
 public class MergeSortArrayList {
-    public void sort(ArrayList<TodoItem> data, int left, int right) {
-        if(left < right) {
-            // Calculate mid point of the array
-            int mid = (left + right) / 2;
-            // Sort the left and right side of the array
-            sort(data, left, mid);
-            sort(data, mid + 1, right);
-            // Merge the sorted arrays of left and right
-            merge(data, left, mid, right);
+
+    private ArrayList<TodoItem> inputArray;
+
+    public ArrayList<TodoItem> getSortedArray() {
+        return inputArray;
+    }
+
+    public MergeSortArrayList(ArrayList<TodoItem> inputArray){
+        this.inputArray = inputArray;
+    }
+
+    public MergeSortArrayList() {}
+
+    public void sortGivenArray(){
+        divide(0, this.inputArray.size() - 1);
+    }
+
+    public void setInputArray(ArrayList<TodoItem> inputArray) {
+        this.inputArray = inputArray;
+    }
+
+    public void divide(int startIndex, int endIndex) {
+        // Divide till you breakdown your list to single element
+        if(startIndex < endIndex && (endIndex - startIndex) >= 1) {
+            //int mid = (endIndex + startIndex) / 2;
+            int mid = (startIndex + endIndex) / 2;
+            divide(startIndex, mid);
+            divide(mid + 1, endIndex);
+            // Merging Sorted array produce above into one sorted array
+            merge(startIndex, mid, endIndex);
         }
     }
 
-    public void merge(ArrayList<TodoItem> data, int left, int mid, int right) {
-        // Calculate sub-array sizes
-        int leftArraySize = mid - left + 1;
-        int rightArraySize = right - mid;
+    public void merge(int startIndex, int midIndex, int endIndex) {
+
+        int leftArraySize = midIndex - startIndex + 1;
+        int rightArraySize = endIndex - midIndex;
 
         // Create temp arrays to merge with sub-array sizes
-        //TodoItem[] leftArray = new TodoItem[leftArraySize];
-        //TodoItem[] rightArray = new TodoItem[rightArraySize];
-        ArrayList<TodoItem> leftArray = new ArrayList<>(leftArraySize);
-        ArrayList<TodoItem> rightArray = new ArrayList<>(rightArraySize);
-
+        TodoItem[] leftArray = new TodoItem[leftArraySize];
+        TodoItem[] rightArray = new TodoItem[rightArraySize];
 
         // Copy data from the main array
         for(int i = 0; i < leftArraySize; ++i) {
-            //leftArray[i] = data[left + i];
-            leftArray.set(i, data.get(left + i));
+            leftArray[i] = inputArray.get(startIndex + i);
         }
         for(int i = 0; i < rightArraySize; ++i) {
-            //rightArray[i] = data[mid + 1 + i];
-            rightArray.set(i, data.get(mid + 1 + i));
+            rightArray[i] = inputArray.get(midIndex + 1 + i);
         }
 
         // Create initial indexes of the sub-arrays and the merging index
         int i = 0, j = 0;
-        int mergeIndex = left;
+        int mergeIndex = startIndex;
 
         // Loop over the array
         while (i < leftArraySize && j < rightArraySize) {
             // Check the completion data value
-            //if(leftArray[i].getCompletionDate() <= rightArray[j].getCompletionDate()) {
-            if(leftArray.get(i).getCompletionDate() <= rightArray.get(j).getCompletionDate()) {
-                //data[mergeIndex] = leftArray[i];
-                data.set(mergeIndex, leftArray.get(i));
+            if(leftArray[i].getCompletionDate() <= rightArray[j].getCompletionDate()) {
+                inputArray.set(mergeIndex, leftArray[i]);
                 ++i;
             } else {
-                //data[mergeIndex] = rightArray[j];
-                data.set(mergeIndex, rightArray.get(j));
+                inputArray.set(mergeIndex, rightArray[j]);
                 ++j;
             }
             ++mergeIndex;
@@ -59,14 +72,12 @@ public class MergeSortArrayList {
 
         // Add any remaining back into the main array
         while (i < leftArraySize) {
-            //data[mergeIndex] = leftArray[i];
-            data.set(mergeIndex, leftArray.get(i));
+            inputArray.set(mergeIndex, leftArray[i]);
             ++i;
             ++mergeIndex;
         }
         while (j < rightArraySize) {
-            //data[mergeIndex] = rightArray[j];
-            data.set(mergeIndex, rightArray.get(j));
+            inputArray.set(mergeIndex, rightArray[j]);
             ++j;
             ++mergeIndex;
         }
