@@ -1,6 +1,7 @@
 package com.slynch.todoapp;
 
 import android.content.Context;
+import android.os.Build;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,9 +19,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 
 public class TodoItemAdapter extends ArrayAdapter<TodoItem> {
 
@@ -30,7 +33,6 @@ public class TodoItemAdapter extends ArrayAdapter<TodoItem> {
     private int mResource;
     private TodoItemAdapter mAdapter;
     private TodoItem[] mDataArray;
-    private List<TodoItem> mDataList;
     private ArrayList<TodoItem> mDataArrayList;
     private int mLastPosition = -1;
     private ViewHolder mViewHolder;
@@ -50,14 +52,6 @@ public class TodoItemAdapter extends ArrayAdapter<TodoItem> {
         mContext = context;
         mResource = resource;
         mDataArray = todoItems;
-        mAdapter = this;
-    }
-
-    public TodoItemAdapter(Context context, int resource, List<TodoItem> todoItems) {
-        super(context, resource, todoItems);
-        mContext = context;
-        mResource = resource;
-        mDataList = todoItems;
         mAdapter = this;
     }
 
@@ -121,27 +115,31 @@ public class TodoItemAdapter extends ArrayAdapter<TodoItem> {
 
         // On Click Listener for the switch within the list view
         mViewHolder.isCompleted.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onClick(View v) {
                 // Update and check if it has worked or not
                 Boolean hasUpdatedItem = MainActivity.getDB().onUpdateData(taskID, title, description, completionDate, mViewHolder.isCompleted.isChecked() == true ? 1 : 0);
                 if(hasUpdatedItem) {
                     Toast.makeText(v.getContext(), "Entry " + taskID + " " + title + " updated.", Toast.LENGTH_SHORT).show();
+                    mDataArrayList.set(position, new TodoItem(taskID, title, description, completionDate, mViewHolder.isCompleted.isChecked() == true ? 1 : 0));
                 } else {
                     Toast.makeText(v.getContext(), "Entry " + taskID + " " + title + " has not updated.", Toast.LENGTH_SHORT).show();
                 }
+                //mAdapter.notifyDataSetChanged();
             }
         });
 
         // On Click Listener for the delete button within the list view
         mViewHolder.deleteTodoItemButton.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onClick(View v) {
                 // Delete and check if it has worked or not
                 Boolean hasDeletedItem = MainActivity.getDB().onDeleteData(taskID);
                 if(hasDeletedItem) {
                     Toast.makeText(v.getContext(), "Entry " + taskID + " " +title + " deleted.", Toast.LENGTH_SHORT).show();
-                    mDataList.remove(position);
+                    mDataArrayList.remove(position);
                 } else {
                     Toast.makeText(v.getContext(), "Entry " + taskID + " " + title + " has not deleted.", Toast.LENGTH_SHORT).show();
                 }

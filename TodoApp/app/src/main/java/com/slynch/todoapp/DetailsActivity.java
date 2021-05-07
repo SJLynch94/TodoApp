@@ -58,7 +58,7 @@ public class DetailsActivity extends AppCompatActivity {
         calendar.set(Calendar.YEAR, year);
         calendar.set(Calendar.MONTH, month);
         calendar.set(Calendar.DAY_OF_MONTH, day);
-        calendar.set(Calendar.HOUR, hour);
+        calendar.set(Calendar.HOUR_OF_DAY, hour);
         calendar.set(Calendar.MINUTE, minute);
         calendar.set(Calendar.SECOND, second);
         calendar.set(Calendar.MILLISECOND, 0);
@@ -83,6 +83,8 @@ public class DetailsActivity extends AppCompatActivity {
 
         // Get the Bundled data of the Item selected if selected
         TodoItem item = (TodoItem) getIntent().getSerializableExtra("todoItemClicked");
+        int position = (int) getIntent().getIntExtra("ListIndex", 0);
+        //mAdapter = (TodoItemAdapter) getIntent().getBundleExtra("todoItemAdapter");
 
         // If item is not null then set data to the UI/widgets, else leave empty and set the complete task switch to be invisible
         if (item != null) {
@@ -122,7 +124,7 @@ public class DetailsActivity extends AppCompatActivity {
                     case R.id.navigation_todo_list:
                         // Load Intent for Main Activity and finish the Details Activity
                         Intent intentTodoList = new Intent(DetailsActivity.this, MainActivity.class);
-                        startActivity(intentTodoList);
+                        //startActivity(intentTodoList);
                         finish();
                         break;
 
@@ -147,10 +149,21 @@ public class DetailsActivity extends AppCompatActivity {
                 if(hasUpdatedItem) {
                     Toast.makeText(DetailsActivity.this, "Entry " + item.getTaskID() + " " + item.getTaskTitle() + " updated.", Toast.LENGTH_SHORT).show();
                     // Update array/array list
+                    MainActivity.getDatabaseList().set(position, new TodoItem(item.getTaskID(),
+                            item.getTaskTitle(),
+                            item.getTaskDescription(),
+                            item.getCompletionDate(),
+                            itemIsCompleted));
+                    /*MainActivity.getDatabaseList().set(position, new TodoItem(MainActivity.getDatabaseList().get(position).getTaskID(),
+                            MainActivity.getDatabaseList().get(position).getTaskTitle(),
+                            MainActivity.getDatabaseList().get(position).getTaskDescription(),
+                            MainActivity.getDatabaseList().get(position).getCompletionDate(),
+                            MainActivity.getDatabaseList().get(position).getIsCompleted()));*/
                 } else {
                     Toast.makeText(DetailsActivity.this, "Entry " + item.getTaskID() + " " + item.getTaskTitle() + " has not updated.", Toast.LENGTH_SHORT).show();
                 }
                 //mAdapter.notifyDataSetChanged();
+                MainActivity.getListViewAdapter().notifyDataSetChanged();
                 finish();
             }
         });
@@ -169,20 +182,22 @@ public class DetailsActivity extends AppCompatActivity {
                     Boolean hasUpdatedItem = MainActivity.getDB().onUpdateData(item.getTaskID(), itemTaskTitle, itemTaskDescription, itemCompletionDate, itemIsCompleted);
                     if(hasUpdatedItem) {
                         Toast.makeText(DetailsActivity.this, "Entry " + item.getTaskID() + " " + itemTaskTitle + " updated.", Toast.LENGTH_SHORT).show();
+                        MainActivity.getDatabaseList().set(position, new TodoItem(item.getTaskID(), itemTaskTitle, itemTaskDescription, itemCompletionDate, itemIsCompleted));
                     } else {
                         Toast.makeText(DetailsActivity.this, "Entry " + item.getTaskID() + " " + itemTaskTitle + " has not updated.", Toast.LENGTH_SHORT).show();
-                        // Update array/array list
                     }
                 } else { // Else must be insert data, insert data from the UI/widgets, check if insert has worked or not
                     Boolean hasInsertedItem = MainActivity.getDB().onInsertData(itemTaskTitle, itemTaskDescription, itemCompletionDate, itemIsCompleted);
                     if(hasInsertedItem) {
                         Toast.makeText(DetailsActivity.this, "Entry " + MainActivity.getDB().onGetData().getCount() + 1 + " " + itemTaskTitle + " inserted.", Toast.LENGTH_SHORT).show();
                         // Insert into array/array list
+                        MainActivity.getDatabaseList().add(new TodoItem(MainActivity.getResultData().getCount() + 1, itemTaskTitle, itemTaskDescription, itemCompletionDate, itemIsCompleted));
                     } else {
                         Toast.makeText(DetailsActivity.this, "Entry " + item.getTaskID() + " " + itemTaskTitle + " has not been inserted.", Toast.LENGTH_SHORT).show();
                     }
                 }
                 //mAdapter.notifyDataSetChanged();
+                MainActivity.getListViewAdapter().notifyDataSetChanged();
                 finish();
             }
         });
@@ -196,10 +211,12 @@ public class DetailsActivity extends AppCompatActivity {
                 if(hasDeletedItem) {
                     Toast.makeText(DetailsActivity.this, "Entry " + item.getTaskID() + " " + item.getTaskTitle() + " deleted.", Toast.LENGTH_SHORT).show();
                     // Remove data from array/array list
+                    MainActivity.getDatabaseList().remove(position);
                 } else {
                     Toast.makeText(DetailsActivity.this, "Entry " + item.getTaskID() + " " + item.getTaskTitle() + " has not deleted.", Toast.LENGTH_SHORT).show();
                 }
                 //mAdapter.notifyDataSetChanged();
+                MainActivity.getListViewAdapter().notifyDataSetChanged();
                 finish();
             }
         });

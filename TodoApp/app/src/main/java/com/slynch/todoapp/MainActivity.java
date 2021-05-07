@@ -33,10 +33,14 @@ public class MainActivity extends AppCompatActivity {
 
     // Member variables to hold the array of data from the database, adapter for the list view
     private TodoItem[] mDatabaseItems;
-    private ArrayList<TodoItem> mDatabaseList;
-    private int mLastItemUpdate = -1;
-    private TodoItemAdapter mListViewAdapter;
 
+    private static ArrayList<TodoItem> mDatabaseList;
+    public static ArrayList<TodoItem> getDatabaseList() { return mDatabaseList; }
+
+    private static TodoItemAdapter mListViewAdapter;
+    public static TodoItemAdapter getListViewAdapter() { return mListViewAdapter; }
+
+    private int mLastItemUpdate = -1;
     private final int mRefreshTime = 1000;
 
     // Static Database
@@ -49,6 +53,9 @@ public class MainActivity extends AppCompatActivity {
 
     private static MergeSortArrayList mergeSortArrayList;
     public static MergeSortArrayList getMergeSortArrayList() { return mergeSortArrayList; }
+
+    private static Cursor resultData;
+    public static Cursor getResultData() { return resultData; }
 
     private static final String TAG = "MainActivity";
 
@@ -94,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             // Get data from database
-            Cursor resultData = mTodoItemsDatabase.onGetData();
+            resultData = mTodoItemsDatabase.onGetData();
             if(resultData.getCount() != 0) {
                 mDatabaseList = new ArrayList<>();
                 mDatabaseItems = new TodoItem[resultData.getCount()];
@@ -115,39 +122,45 @@ public class MainActivity extends AppCompatActivity {
                 mergeSort.sort(mDatabaseItems, 0, mDatabaseItems.length - 1);
             }
 
-            /*if(mDatabaseList.size() != 0 && mDatabaseList != null) {
-                mergeSortArrayList.sort(mDatabaseList, 0, mDatabaseList.size() - 1);
-            }*/
+            if(mDatabaseList.size() != 0 && mDatabaseList != null) {
+                //mergeSortArrayList.sort(mDatabaseList, 0, mDatabaseList.size() - 1);
+                mergeSortArrayList.setInputArray(mDatabaseList);
+                mergeSortArrayList.sortGivenArray();
+                mDatabaseList = mergeSortArrayList.getSortedArray();
+            }
 
             // Initialise adapter and set adapter to the list view
-            mListViewAdapter = new TodoItemAdapter(this, R.layout.row, mDatabaseItems);
+            mListViewAdapter = new TodoItemAdapter(this, R.layout.row, mDatabaseList);
+            //mListViewAdapter = new TodoItemAdapter(this, R.layout.row, mDatabaseItems);
             mListView.setAdapter(mListViewAdapter);
             // Set on Click Listener for the item to be selected
             mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     mLastItemUpdate = position;
-                    Toast.makeText(MainActivity.this, "Clicked Item: " + mDatabaseItems[position].getTaskID() + " " + mDatabaseItems[position].getTaskTitle(), Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(MainActivity.this, "Clicked Item: " + mDatabaseItems[position].getTaskID() + " " + mDatabaseItems[position].getTaskTitle(), Toast.LENGTH_SHORT).show();
                     Toast.makeText(MainActivity.this, "Clicked Item: " + mDatabaseList.get(position).getTaskID() + " " + mDatabaseList.get(position).getTaskTitle(), Toast.LENGTH_SHORT).show();
                     // Create Intent to load Details Activity, Create Bundle to pass the selected data over, put serialized data into Bundle and the Bundle into the Intent
                     Intent intentTodoDetails = new Intent(MainActivity.this, DetailsActivity.class);
                     Bundle itemBundle = new Bundle();
-                    TodoItem item = new TodoItem(mDatabaseItems[position].getTaskID(),
+                    /*TodoItem item = new TodoItem(mDatabaseItems[position].getTaskID(),
                             mDatabaseItems[position].getTaskTitle(),
                             mDatabaseItems[position].getTaskDescription(),
                             mDatabaseItems[position].getCompletionDate(),
-                            mDatabaseItems[position].getIsCompleted());
-                    TodoItem itemFromArrayList = new TodoItem(mDatabaseList.get(position).getTaskID(),
+                            mDatabaseItems[position].getIsCompleted());*/
+                    TodoItem item = new TodoItem(mDatabaseList.get(position).getTaskID(),
                             mDatabaseList.get(position).getTaskTitle(),
                             mDatabaseList.get(position).getTaskDescription(),
                             mDatabaseList.get(position).getCompletionDate(),
                             mDatabaseList.get(position).getIsCompleted());
+                    itemBundle.putInt("ListIndex", position);
                     itemBundle.putSerializable("todoItemClicked", item);
                     intentTodoDetails.putExtras(itemBundle);
                     startActivity(intentTodoDetails);
                 }
             });
         } catch (Exception e) {
+            Log.e(TAG, "Error from: " + e.getMessage());
             Toast.makeText(MainActivity.this, "No Todo Item Entries Exist. Please create a Todo Item.", Toast.LENGTH_SHORT).show();
         }
 
